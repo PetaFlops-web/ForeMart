@@ -46,7 +46,7 @@ docker --version
 docker compose version
 ```
 
-## 🚀 Quick Start (Production)
+## 🚀 Quick Start
 
 ### 1. Persiapan Konfigurasi
 
