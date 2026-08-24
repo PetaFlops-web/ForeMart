@@ -31,16 +31,6 @@ Sistem terintegrasi untuk manajemen UMKM dengan prediksi machine learning, terdi
 | **ML Service** | Python FastAPI | 8000 | 8000 | Prediksi penjualan dan rekomendasi restock |
 | **Database** | MySQL 8.0 | 3307 | 3306 | Penyimpanan data terpusat |
 
-## ✅ Production Status
-
-Sistem telah **tested dan verified** dari fresh clone:
-- ✅ Clone langsung dari GitHub → berhasil tanpa error
-- ✅ Docker build all images → 100% success
-- ✅ All 4 containers healthy → fully operational
-- ✅ Health check endpoints working → monitoring ready
-- ✅ Inter-service communication → all working
-- ✅ ML prediction endpoint → tested and returning correct results
-
 **Deployment**: Fresh from GitHub → `docker compose up -d` → READY! 🚀
 
 ## 📋 Prasyarat
@@ -56,6 +46,51 @@ Sistem telah **tested dan verified** dari fresh clone:
 docker --version
 docker compose version
 ```
+
+## 📦 Cara Clone Repository
+
+### Menggunakan Git Submodules (RECOMMENDED)
+
+Proyek ini menggunakan Git Submodules untuk manage 3 sub-repository:
+- **Backend** - Go application
+- **Frontend** - React application  
+- **ML Service** - Python machine learning service
+
+**Clone dengan satu perintah:**
+
+```bash
+git clone --recurse-submodules https://github.com/PetaFlops-web/ForeMart.git ForeMart
+cd ForeMart
+```
+
+Command `--recurse-submodules` akan otomatis:
+- ✅ Clone kode lengkap dari semua submodules
+- ✅ Checkout commit terbaru yang sudah tested
+- ✅ Siap langsung deploy dengan `docker compose up -d`
+
+### Alternatif: Clone Tanpa Recurse
+
+Jika tanpa flag `--recurse-submodules`:
+
+```bash
+git clone https://github.com/PetaFlops-web/ForeMart.git ForeMart
+cd ForeMart
+
+# Update submodules manual
+git submodule update --init --recursive
+```
+
+### Verifikasi Setelah Clone
+
+Semua folder harus terisi dengan file:
+
+```bash
+ls -la backend/     # ✅ Ada file Go
+ls -la frontend/    # ✅ Ada file React  
+ls -la machine-learning/  # ✅ Ada file Python
+```
+
+❌ Jika folder kosong → Jalankan `git submodule update --init --recursive`
 
 ## 🚀 Quick Start (Production)
 
