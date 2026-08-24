@@ -1,0 +1,9 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/PetaFlops-web/backend-foremart.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/PetaFlops-web/frontend-foremart.git
+[submodule "machine-learning"]
+	path = machine-learning
+	url = https://github.com/PetaFlops-web/ml-foremart.git

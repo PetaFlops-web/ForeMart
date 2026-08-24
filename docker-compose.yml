@@ -1,0 +1,111 @@
+services:
+  # ============================================
+  # DATABASE - MySQL 8.0
+  # ============================================
+  aic_mysql:
+    image: mysql:8.0
+    container_name: aic_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-smbk_root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-smart_commerce}
+      MYSQL_USER: ${MYSQL_USER:-smbk_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-smbk_password}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - foremart-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ============================================
+  # MACHINE LEARNING SERVICE - FastAPI
+  # ============================================
+  ml-service:
+    build:
+      context: ./machine-learning/ml-service
+      dockerfile: Dockerfile
+    image: foremart-ml:latest
+    container_name: ml_service
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Jakarta
+    ports:
+      - "8000:8000"
+    networks:
+      - foremart-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================
+  # BACKEND - Go/Fiber
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aic_be
+    restart: unless-stopped
+    depends_on:
+      aic_mysql:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - foremart-network
+    volumes:
+      - ./backend/config.production.json:/app/config.json:ro
+    environment:
+      - CONFIG_PATH=/app/config.json
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/swagger/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ============================================
+  # FRONTEND - React + Nginx
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nota-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3080:80"
+    environment:
+      BACKEND_URL: "http://backend:8080"
+    networks:
+      - foremart-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  foremart-network:
+    driver: bridge
+    name: foremart-network
+
+volumes:
+  mysql_data:
+    driver: local
